@@ -1,41 +1,29 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { MovieProvider } from "./context/MovieContext";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./layout/Layout";
 import MovieList from "./pages/MovieList";
 import Movie from "./pages/Movie";
+import { MovieProvider } from "./context/MovieContext";
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+// Главный компонент приложения
+const App = () => {
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <nav>
-          <Link to="/" className="nav-link">
-            Movie Database
-          </Link>
-        </nav>
-      </header>
-
-      <main className="app-main">{children}</main>
-
-      <footer className="app-footer">
-        <p>© 2024 Movie Database. All rights reserved.</p>
-      </footer>
-    </div>
+    // Провайдер маршрутизации
+    <Router>
+      {/* Провайдер контекста для управления состоянием фильмов */}
+      <MovieProvider>
+        {/* Определение маршрутов */}
+        <Routes>
+          {/* Корневой маршрут с макетом */}
+          <Route element={<Layout />}>
+            {/* Главная страница со списком фильмов */}
+            <Route path="/" element={<MovieList />} />
+            {/* Страница детальной информации о фильме */}
+            <Route path="/movie/:id" element={<Movie />} />
+          </Route>
+        </Routes>
+      </MovieProvider>
+    </Router>
   );
 };
-
-function App() {
-  return (
-    <MovieProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<MovieList />} />
-            <Route path="/movie/:id" element={<Movie />} />
-          </Routes>
-        </Layout>
-      </Router>
-    </MovieProvider>
-  );
-}
 
 export default App;

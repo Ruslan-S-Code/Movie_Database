@@ -1,25 +1,24 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import Header from "./Header.tsx";
+import Footer from "./Footer.tsx";
 import { MovieProvider } from "../context/MovieContext";
+import { FC } from "react";
 
-const Layout = () => {
+// Компонент макета приложения
+const Layout: FC = () => {
   return (
     <MovieProvider>
-      <div className="app-container">
-        <header className="app-header">
-          <nav>
-            <Link to="/" className="nav-link">
-              🏠 Home
-            </Link>
-          </nav>
-        </header>
+      <div className="app">
+        {/* Шапка сайта */}
+        <Header />
 
-        <main className="app-main">
+        {/* Основной контент */}
+        <main>
           <Outlet />
         </main>
 
-        <footer className="app-footer">
-          <p>© 2025 Movie App</p>
-        </footer>
+        {/* Подвал сайта */}
+        <Footer />
       </div>
     </MovieProvider>
   );

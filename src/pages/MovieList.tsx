@@ -3,15 +3,21 @@ import { Link } from "react-router-dom";
 import { useMovieContext } from "../context/MovieContext";
 import backgroundImage from "../assets/kino.webp";
 
+// Компонент списка фильмов
 const MovieList = () => {
+  // Получаем состояние и dispatch из контекста
   const { state, dispatch } = useMovieContext();
+  // Состояние для управления модальным окном жанров
   const [isGenreModalOpen, setIsGenreModalOpen] = useState(false);
+  // Состояние для отображения кнопки прокрутки наверх
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  // Применяем фильтры и сортировку при изменении состояния
   useEffect(() => {
     dispatch({ type: "APPLY_FILTERS_AND_SORT" });
   }, [state.sortType, state.filters, dispatch]);
 
+  // Обработчик прокрутки страницы
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollTop(window.scrollY > 300);
@@ -21,6 +27,7 @@ const MovieList = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Функция прокрутки наверх
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -28,6 +35,7 @@ const MovieList = () => {
     });
   };
 
+  // Кнопки сортировки
   const sortButtons = [
     { label: "Newest First", value: "year-desc" },
     { label: "Oldest First", value: "year-asc" },
@@ -37,14 +45,17 @@ const MovieList = () => {
     { label: "Z-A", value: "title-desc" },
   ];
 
+  // Получаем уникальные годы для фильтра
   const years = [...new Set(state.movies.map((movie) => movie.year))]
     .sort()
     .reverse();
 
+  // Получаем уникальные жанры для фильтра
   const allGenres = [
     ...new Set(state.movies.flatMap((movie) => movie.genre)),
   ].sort();
 
+  // Компонент модального окна для фильтрации по жанрам
   const GenreModal = () => {
     if (!isGenreModalOpen) return null;
 
@@ -100,14 +111,17 @@ const MovieList = () => {
 
   return (
     <div className="container">
+      {/* Фоновое изображение */}
       <div
         className="page-background"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       ></div>
       <h1>Movie Database</h1>
 
+      {/* Панель фильтров */}
       <div className="filters">
         <div className="search-controls">
+          {/* Поле поиска */}
           <input
             type="text"
             placeholder="Search movies..."
@@ -121,6 +135,7 @@ const MovieList = () => {
             className="search-input"
           />
 
+          {/* Фильтр по году */}
           <select
             value={state.filters.year}
             onChange={(e) =>
@@ -139,6 +154,7 @@ const MovieList = () => {
             ))}
           </select>
 
+          {/* Кнопка фильтра по жанрам */}
           <button
             className={`filter-button ${state.filters.genre ? "active" : ""}`}
             onClick={() => setIsGenreModalOpen(true)}
@@ -150,8 +166,10 @@ const MovieList = () => {
         </div>
       </div>
 
+      {/* Модальное окно жанров */}
       <GenreModal />
 
+      {/* Панель сортировки */}
       <div className="sort-controls">
         <div className="sort-buttons">
           {sortButtons.map((button) => (
@@ -173,6 +191,7 @@ const MovieList = () => {
         </div>
       </div>
 
+      {/* Сетка фильмов */}
       <div className="movie-grid">
         {state.filteredMovies.map((movie) => (
           <Link to={`/movie/${movie.id}`} key={movie.id} className="movie-card">
@@ -208,6 +227,7 @@ const MovieList = () => {
         ))}
       </div>
 
+      {/* Кнопка прокрутки наверх */}
       <button
         className={`scroll-to-top ${showScrollTop ? "visible" : ""}`}
         onClick={scrollToTop}

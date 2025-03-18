@@ -1,14 +1,15 @@
 import { createContext, useContext, useReducer, ReactNode } from "react";
 import movies from "../data/data";
 
+// Типы для фильмов и состояния приложения
 type Movie = {
   id: number;
   title: string;
   year: string;
+  rate: string;
+  genre: string[];
   director: string;
   duration: string;
-  genre: string[];
-  rate: string;
 };
 
 type SortType =
@@ -32,13 +33,15 @@ type MovieState = {
   filteredMovies: Movie[];
 };
 
+// Типы действий для reducer
 type MovieAction =
   | { type: "SET_SORT_TYPE"; payload: SortType }
   | { type: "SET_FILTER"; payload: Partial<Filters> }
   | { type: "APPLY_FILTERS_AND_SORT" };
 
+// Начальное состояние приложения
 const initialState: MovieState = {
-  movies: movies,
+  movies,
   sortType: "year-desc",
   filters: {
     search: "",
@@ -48,6 +51,7 @@ const initialState: MovieState = {
   filteredMovies: movies,
 };
 
+// Reducer для управления состоянием
 const movieReducer = (state: MovieState, action: MovieAction): MovieState => {
   switch (action.type) {
     case "SET_SORT_TYPE":
@@ -55,49 +59,49 @@ const movieReducer = (state: MovieState, action: MovieAction): MovieState => {
         ...state,
         sortType: action.payload,
       };
-
     case "SET_FILTER":
       return {
         ...state,
-        filters: { ...state.filters, ...action.payload },
+        filters: {
+          ...state.filters,
+          ...action.payload,
+        },
       };
-
-    case "APPLY_FILTERS_AND_SORT": {
+    case "APPLY_FILTERS_AND_SORT":
       let filtered = [...state.movies];
 
-      // Apply search filter
+      // Применяем фильтр по поиску
       if (state.filters.search) {
-        const searchTerm = state.filters.search.toLowerCase();
         filtered = filtered.filter((movie) =>
-          movie.title.toLowerCase().includes(searchTerm)
+          movie.title.toLowerCase().includes(state.filters.search.toLowerCase())
         );
       }
 
-      // Apply year filter
+      // Применяем фильтр по году
       if (state.filters.year) {
         filtered = filtered.filter(
           (movie) => movie.year === state.filters.year
         );
       }
 
-      // Apply genre filter
+      // Применяем фильтр по жанру
       if (state.filters.genre) {
         filtered = filtered.filter((movie) =>
           movie.genre.includes(state.filters.genre)
         );
       }
 
-      // Apply sorting
+      // Применяем сортировку
       filtered.sort((a, b) => {
         switch (state.sortType) {
-          case "year-asc":
-            return a.year.localeCompare(b.year);
           case "year-desc":
             return b.year.localeCompare(a.year);
-          case "rating-asc":
-            return parseFloat(a.rate) - parseFloat(b.rate);
+          case "year-asc":
+            return a.year.localeCompare(b.year);
           case "rating-desc":
             return parseFloat(b.rate) - parseFloat(a.rate);
+          case "rating-asc":
+            return parseFloat(a.rate) - parseFloat(b.rate);
           case "title-asc":
             return a.title.localeCompare(b.title);
           case "title-desc":
@@ -111,20 +115,18 @@ const movieReducer = (state: MovieState, action: MovieAction): MovieState => {
         ...state,
         filteredMovies: filtered,
       };
-    }
-
     default:
       return state;
   }
 };
 
-type MovieContextType = {
+// Создаем контекст для фильмов
+const MovieContext = createContext<{
   state: MovieState;
   dispatch: React.Dispatch<MovieAction>;
-};
+} | null>(null);
 
-const MovieContext = createContext<MovieContextType | undefined>(undefined);
-
+// Провайдер контекста
 export const MovieProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(movieReducer, initialState);
 
@@ -135,9 +137,10 @@ export const MovieProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
+// Хук для использования контекста
 export const useMovieContext = () => {
   const context = useContext(MovieContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useMovieContext must be used within a MovieProvider");
   }
   return context;
